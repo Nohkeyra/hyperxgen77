@@ -1,37 +1,89 @@
-- name: Prepare deployment folder
-  run: |
-    echo "=== Checking for existing built files ==="
-    
-    # Option 1: Use already-built files from appsgeyser-upload/www/
-    if [ -f "appsgeyser-upload/www/index.html" ]; then
-      echo "Found built files in appsgeyser-upload/www/"
-      # Check if it's the built version
-      if grep -q "assets/index\." appsgeyser-upload/www/index.html; then
-        echo "This is a BUILT index.html (has assets/)"
-      else
-        echo "This is a DEV index.html (needs build)"
-      fi
-      
-      # Clean root and copy
-      find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' ! -name 'appsgeyser-upload' -exec rm -rf {} +
-      cp -r appsgeyser-upload/www/* .
-      rm -rf appsgeyser-upload
-    
-    # Option 2: Use dist/ folder from build
-    elif [ -d "dist" ]; then
-      echo "Found dist/ folder from build"
-      find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
-      cp -r dist/* .
-    
-    # Option 3: Build failed, use what we have
-    else
-      echo "WARNING: No built files found. Using current files."
-      # At least make sure we have index.html
-      if [ ! -f "index.html" ]; then
-        echo "ERROR: No index.html found!"
-        exit 1
-      fi
-    fi
-    
-    echo "=== Final files ==="
-    ls -la
+name: Deploy PWA to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the app
+        run: |
+          echo "=== Building app ==="
+          npm run build 2>&1 | tee build.log
+          echo "Build exit code: $?"
+
+      - name: Debug - Check built files
+        run: |
+          echo "=== Checking for dist/ folder ==="
+          if [ -d "dist" ]; then
+            echo "dist/ folder exists:"
+            ls -la dist/
+          else
+            echo "ERROR: No dist/ folder created!"
+            echo "=== Build log ==="
+            tail -100 build.log
+          fi
+
+      - name: Prepare deployment folder
+        run: |
+          echo "=== Preparing deployment ==="
+          
+          # Check if we have dist/ from successful build
+          if [ -d "dist" ]; then
+            echo "Using dist/ folder from build"
+            # Clean everything except .git and .github
+            find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
+            # Copy built files to root
+            cp -r dist/* .
+          
+          # Fallback: Use pre-built files
+          elif [ -d "appsgeyser-upload/www" ]; then
+            echo "Using pre-built files from appsgeyser-upload/www/"
+            # Clean everything except .git, .github, and the source folder
+            find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' ! -name 'appsgeyser-upload' -exec rm -rf {} +
+            # Copy pre-built files to root
+            cp -r appsgeyser-upload/www/* .
+            # Remove the source folder
+            rm -rf appsgeyser-upload
+          
+          else
+            echo "ERROR: No built files found!"
+            exit 1
+          fi
+          
+          echo "=== Final files in root ==="
+          ls -la
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
