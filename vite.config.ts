@@ -3,21 +3,10 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/hyperxgen77/', // ← CRITICAL: GitHub Pages subpath
+  base: '/hyperxgen77/',  // MUST be this for GitHub Pages
   build: {
-    outDir: 'dist', // ← Standard output folder
+    outDir: 'dist',
     emptyOutDir: true,
-    sourcemap: false,
-    assetsDir: 'assets',
-    rollupOptions: {
-      output: {
-        assetFileNames: 'assets/[name].[hash][extname]',
-        chunkFileNames: 'assets/[name].[hash].js',
-        entryFileNames: 'assets/[name].[hash].js'
-      }
-    }
-  },
-  server: {
-    port: 3000
+    sourcemap: false
   }
 })
