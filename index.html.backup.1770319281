@@ -1,0 +1,46 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HYPERXGEN | Synthesis Engine</title>
+    <style>
+        /* Basic fallback styles */
+        body { margin: 0; padding: 0; background: #000; color: white; font-family: sans-serif; }
+        #root { min-height: 100vh; }
+        #api-prompt { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 10000; color: #FD1E4A; padding: 20px; text-align: center; }
+    </style>
+<link rel="stylesheet" href="./">
+</head>
+<body>
+    <div id="api-prompt">
+        <h2>Gemini API Key Required</h2>
+        <p>Get free API key from: <a href="https://aistudio.google.com/apikey" style="color: #FD1E4A;">https://aistudio.google.com/apikey</a></p>
+        <input type="text" id="api-key" placeholder="Paste your API key here" style="width: 80%; padding: 10px; margin: 10px;">
+        <button onclick="saveApiKey()" style="background: #FD1E4A; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Save & Continue</button>
+    </div>
+    
+    <div id="root"></div>
+    
+    <script>
+        // API Key handling
+        function saveApiKey() {
+            const key = document.getElementById('api-key').value.trim();
+            if (key && key.length > 10) {
+                localStorage.setItem('GEMINI_API_KEY', key);
+                document.getElementById('api-prompt').style.display = 'none';
+                location.reload();
+            } else {
+                alert('Please enter a valid API key');
+            }
+        }
+        
+        // Check on load
+            document.getElementById('api-prompt').style.display = 'flex';
+            document.getElementById('api-prompt').style.flexDirection = 'column';
+            document.getElementById('api-prompt').style.justifyContent = 'center';
+            document.getElementById('api-prompt').style.alignItems = 'center';
+        }
+    </script>
+<script src="./"></script>
+</body>
+</html>

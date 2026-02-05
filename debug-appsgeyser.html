@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DEBUG - File Locations</title>
+    <script>
+    window.addEventListener('load', function() {
+        var debug = document.getElementById('debug');
+        debug.innerHTML += '<p>Current URL: ' + window.location.href + '</p>';
+        debug.innerHTML += '<p>Page path: ' + window.location.pathname + '</p>';
+        
+        // Try to load assets
+        var testAssets = ['assets/index.js', './assets/index.js', '/assets/index.js'];
+        testAssets.forEach(function(path) {
+            var img = new Image();
+            img.onload = function() {
+                debug.innerHTML += '<p style="color:green">✓ Found: ' + path + '</p>';
+            };
+            img.onerror = function() {
+                debug.innerHTML += '<p style="color:red">✗ Missing: ' + path + '</p>';
+            };
+            img.src = path + '?test=' + Date.now();
+        });
+    });
+    </script>
+</head>
+<body>
+    <h1>APPSGEYSER DEBUG</h1>
+    <div id="debug"></div>
+    <div id="root">React app should load here...</div>
+    <script src="assets/index.js"></script>
+</body>
+</html>
