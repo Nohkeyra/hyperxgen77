@@ -1,14 +1,21 @@
 {
-  "appName": "Hyper X Gen AI",
-  "packageName": "com.hyperxgen.ai",
-  "primaryColor": "#000000",
-  "secondaryColor": "#FD1E4A",
-  "splashScreen": "index.html",
-  "targetSdkVersion": 33,
-  "minSdkVersion": 21,
-  "versionCode": 1,
-  "versionName": "1.0.0",
-  "orientation": "portrait",
-  "permissions": ["INTERNET"],
-  "description": "AI Image Generator - Requires Gemini API Key"
+  "panels": {
+    "enabled": [
+      "VectorPanel",
+      "TypographyPanel", 
+      "MonogramPanel",
+      "StyleExtractorPanel",
+      "ImageFilterPanel",
+      "SystemAuditPanel"
+    ],
+    "disabled": [],
+    "panelOrder": [
+      "VectorPanel",
+      "TypographyPanel",
+      "MonogramPanel", 
+      "StyleExtractorPanel",
+      "ImageFilterPanel",
+      "SystemAuditPanel"
+    ]
+  }
 }

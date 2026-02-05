@@ -13,18 +13,33 @@ export interface KernelConfig {
   temperature: number;
   model: string;
   deviceContext: string;
-  // Removed precision?: 'MAX' | 'STD';
+  useProModel?: boolean;
 }
 
-// Fix: Removed TerminalMessage interface
-// export interface TerminalMessage {
-//   id: string;
-//   role: 'user' | 'kernel';
-//   content: string;
-//   timestamp: string;
-//   isTrace?: boolean;
-//   groundingSources?: { title: string; uri: string }[];
-// }
+export interface ExtractionResult {
+  name: string;
+  description?: string;
+  parameters?: Record<string, any>;
+  timestamp?: string;
+  imageUrl?: string;
+  style?: string;
+  colors?: string[];
+}
+
+export interface CloudArchiveEntry {
+  id: string;
+  name: string;
+  timestamp?: string;
+  size?: number;
+  type?: string;
+}
+
+export interface LogEntry {
+  id: string;
+  timestamp: string;
+  message: string;
+  type: 'info' | 'error' | 'success' | 'warning';
+}
 
 export interface PresetItem {
   id: string;
@@ -46,132 +61,38 @@ export interface PresetCategory {
 
 export type PanelCategory = PresetCategory;
 
-export interface LogEntry {
-  id: string;
-  timestamp: string;
-  message: string;
-  type: 'info' | 'error' | 'success' | 'warning';
+// Add VectorPanelProps since VectorPanel uses it
+export interface VectorPanelProps {
+  initialData?: any;
+  kernelConfig: KernelConfig;
+  integrity: number;
+  refinementLevel: number;
+  onSaveToHistory: (work: any) => void;
+  onModeSwitch: (mode: PanelMode, data?: any) => void;
+  onSetGlobalDna: (dna: ExtractionResult | null) => void;
+  savedPresets: PresetItem[];
+  globalDna: ExtractionResult | null;
+  onToggleTurbo: () => void;
+  addLog: (message: string, type?: LogEntry['type']) => void;
 }
 
-export interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'bot';
-  timestamp: string;
+// Add other panel props interfaces
+export interface TypographyPanelProps extends VectorPanelProps {}
+export interface MonogramPanelProps extends VectorPanelProps {}
+export interface StyleExtractorPanelProps extends VectorPanelProps {
+  onSaveToPresets: (preset: PresetItem) => void;
+  onDeletePreset: (id: string) => void;
+  activeGlobalDna: ExtractionResult | null;
+  onCommitPreset: () => void;
 }
-
-export interface ExtractionResult {
-  domain: 'Vector' | 'Typography' | 'Monogram';
-  category: string;
-  name: string;
-  description: string;
-  confidence: number;
-  styleAuthenticityScore: number; // New: Quantifies how "100% legit" the detected style is.
-  palette: string[];
-  parameters: {
-    threshold: number;
-    smoothing: number;
-    detail: number;
-    edge: number;
-    [key: string]: number;
-  };
-  preview_png?: string;
-}
-
-export interface AppState {
-  currentMode: PanelMode;
-  selectedPresetId: string | null;
-  isProcessing: boolean;
-  subjectFocus: boolean;
-  parameters: Record<string, number>;
-  history: any[];
-}
-
-export interface PanelPersona {
-  role: string;
-  specialty: string;
-  motto: string;
-  tagline: string;
-  icon: string;
-  personality: {
-    traits: string[];
-    communication: {
-      toAI: string;
-      toTypography?: string;
-      toVector?: string;
-      toColor?: string;
-      toExport?: string;
-    };
-    quirks: string[];
-  };
-  performance: {
-    anchorEfficiency?: string;
-    symmetryBalance?: string;
-    optimizationRate?: string;
-    status: string;
-    glyphMorphing?: string;
-    textFlow?: string;
-    styleInfusion?: string;
-    readabilityScore?: string;
-    brandAlignment?: string;
-    styleConsistency?: string;
-    renderingQuality?: string;
-    systemHarmony?: string;
-    legibility?: string;
-    aestheticCohesionIndex?: string;
-    emotionalResonance?: string;
-  };
-}
-
-export interface RepairSummary {
-  totalNodes: number;
-  repairedNodes: number;
-  failedNodes: number;
-  averageRepairTime: number;
-  totalTime: number;
-  criticalFailures: number;
-  systemStabilityScore: number;
-}
-
-export interface CloudRepairSummary extends RepairSummary {
-  id: string;
-  timestamp: string;
-  type: 'RepairReport';
-  integrityAfterRepair: number;
-}
-
-export interface RefineSummary {
-  totalIssues: number;
-  resolvedIssues: number;
-  performanceGain: number;
-  visualScore: number;
-  totalTime: number;
-  mode: string;
-  uxScore: number;
-  aestheticCohesionIndex: number;
-}
-
-export interface CloudRefineSummary extends RefineSummary {
-  id: string;
-  timestamp: string;
-  type: 'RefineReport';
-  uiRefinementLevelAfterRefine: number;
-}
-
-export type CloudArchiveEntry = CloudRepairSummary | CloudRefineSummary;
-
-export interface RealIssue {
-  id: string;
-  type: 'CSS' | 'Accessibility' | 'Performance' | 'TypeScript' | 'React';
-  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO';
+export interface ImageFilterPanelProps extends VectorPanelProps {}
+export interface PanelHeaderProps {
   title: string;
-  description: string;
-  file: string;
-  line?: number;
-  codeSnippet: string;
-  fix: string;
-  fixed: boolean;
-  canAutoFix: boolean;
-  timestamp: number;
-  impact: 'VISUAL' | 'PERFORMANCE' | 'ACCESSIBILITY' | 'MAINTAINABILITY';
+  integrity: number;
+  onBack: () => void;
+  isDarkMode: boolean;
+  onToggleTheme: () => void;
+  onStartRepair: () => void;
+  onStartRefine: () => void;
+  onToggleLogViewer: () => void;
 }
