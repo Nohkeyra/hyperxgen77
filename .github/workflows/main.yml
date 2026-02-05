@@ -19,16 +19,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Copy PWA Files to Root
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the app
+        run: npm run build
+
+      - name: Prepare deployment folder
         run: |
-          # Remove everything except .git, .github, and the source folder
-          find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' ! -name 'appsgeyser-upload' -exec rm -rf {} +
-          # Copy the app files to root
-          cp -r appsgeyser-upload/www/* .
-          # Remove the source folder after copying (optional, keeps root clean)
-          rm -rf appsgeyser-upload
-          # List files to verify
-          ls -la
+          # Remove everything except .git and .github
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
+          # Copy the built files from dist folder to root
+          cp -r dist/* .
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
