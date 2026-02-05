@@ -8,7 +8,6 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # ✅ PERMISSIONS ARE SET HERE, AT THE JOB LEVEL
     permissions:
       contents: read
       pages: write
@@ -22,11 +21,14 @@ jobs:
 
       - name: Copy PWA Files to Root
         run: |
-          # Remove everything except .git and .github folders
-          find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
+          # Remove everything except .git, .github, and the source folder
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' ! -name 'appsgeyser-upload' -exec rm -rf {} +
           # Copy the app files to root
           cp -r appsgeyser-upload/www/* .
-          ls -la # List files to verify copy
+          # Remove the source folder after copying (optional, keeps root clean)
+          rm -rf appsgeyser-upload
+          # List files to verify
+          ls -la
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
