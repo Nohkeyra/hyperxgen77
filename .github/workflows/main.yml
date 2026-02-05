@@ -23,19 +23,65 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci  # Uses package-lock.json for exact versions
+
+      - name: Debug - List files before build
+        run: |
+          echo "=== Files before build ==="
+          ls -la
+          echo ""
+          echo "=== Checking source files ==="
+          find . -name "*.tsx" -o -name "*.ts" -o -name "*.jsx" -o -name "*.js" | head -10
 
       - name: Build the app
-        run: npm run build
+        run: |
+          npm run build 2>&1 | tee build.log
+          echo "=== Build exit code: $? ==="
+          echo "=== Build log tail ==="
+          tail -50 build.log
+        continue-on-error: false
+
+      - name: Debug - List files after build
+        run: |
+          echo "=== Files after build ==="
+          ls -la
+          echo ""
+          echo "=== dist/ folder contents ==="
+          ls -la dist/ 2>/dev/null || echo "No dist folder created"
+          echo ""
+          echo "=== Looking for assets ==="
+          find . -name "assets" -type d 2>/dev/null
 
       - name: Prepare deployment folder
         run: |
-          # Remove everything except .git and .github
-          find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
-          # Copy the built files from dist folder to root
-          cp -r dist/* .
+          # Check if dist exists
+          if [ ! -d "dist" ]; then
+            echo "ERROR: dist/ folder not found after build!"
+            echo "Trying to find built files elsewhere..."
+            
+            # Look for the built index.html from earlier
+            if [ -f "appsgeyser-upload/www/index.html" ]; then
+              echo "Found old built files in appsgeyser-upload/www/"
+              # Clean root except .git and .github
+              find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' ! -name 'appsgeyser-upload' -exec rm -rf {} +
+              cp -r appsgeyser-upload/www/* .
+              rm -rf appsgeyser-upload
+            else
+              echo "ERROR: No built files found anywhere!"
+              exit 1
+            fi
+          else
+            echo "dist/ folder found. Copying to root..."
+            # Clean root except .git and .github
+            find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
+            cp -r dist/* .
+          fi
+          
+          echo "=== Final root contents ==="
+          ls -la
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
