@@ -3,10 +3,15 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/hyperxgen77/',  // MUST be this for GitHub Pages
+  base: '/hyperxgen77/',  // CRITICAL: Must match your repo name
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    sourcemap: false
+    sourcemap: false,
+    rollupOptions: {
+      input: {
+        main: './index.html'
+      }
+    }
   }
 })
